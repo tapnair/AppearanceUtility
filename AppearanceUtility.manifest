@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion360",
+	"type":	"addin",
+	"id":	"33650399-76a8-4dbb-a44b-1ddb60f77f82",
+	"author":	"Patrick Rainsberry",
+	"description":	{
+		"":	"Set of Utilities for managing Fusion 360 Appearances."
+	},
+	"version":	"1.0",
+	"runOnStartup":	false,
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true
+}
