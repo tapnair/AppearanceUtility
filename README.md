@@ -29,7 +29,7 @@ Displays all objects associated with each appearance in the model allows you to 
 
 
 
-![Rename Command](./resources/readme_cover.png)
+![Rename Command](./resources/remove_command.png)
 
 
 ## License
