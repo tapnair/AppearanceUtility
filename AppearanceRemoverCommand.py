@@ -28,6 +28,7 @@ def get_appearances_dict():
             result = {}
             result['item'] = item
             result['id'] = str(appearance.id).translate(translator)
+            result['id'] = appearance.id
 
             if item.objectType == adsk.fusion.BRepBody.classType():
                 result['type'] = "Body"
@@ -131,12 +132,13 @@ class AppearanceRemoverCommand(Fusion360CommandBase):
         index = 0
         for appearance_name, item_list in appearances_dict.items():
             # ao.ui.messageBox(appearance_name)
-            group_inputs = inputs.addGroupCommandInput(item_list[0]['id'], appearance_name)
+            translator = str.maketrans('', '', string.punctuation)
+            group_inputs = inputs.addGroupCommandInput(str(item_list[0]['id']).translate(translator), appearance_name)
             sub_index = 0
             for item in item_list:
                 bool_id = "bool_input_" + str(index) + "_" + str(sub_index)
 
-                ao.ui.messageBox(str(item))
+                # ao.ui.messageBox(str(item))
                 bool_input = group_inputs.children.addBoolValueInput(bool_id, item['name'], True, "", True)
                 bool_input.isEnabledCheckBoxDisplayed = True
                 item['item'].attributes.add("AppearanceUtilities", bool_id, item['id'])
