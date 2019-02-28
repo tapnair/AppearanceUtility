@@ -4,6 +4,8 @@ import traceback
 
 from collections import defaultdict
 
+import string
+
 from .Fusion360Utilities.Fusion360Utilities import AppObjects
 from .Fusion360Utilities.Fusion360CommandBase import Fusion360CommandBase
 
@@ -15,36 +17,61 @@ def get_appearances_dict():
 
     all_appearances = ao.design.appearances
     results = defaultdict(list)
+
+    translator = str.maketrans('', '', string.punctuation)
+
+
     for appearance in all_appearances:
         used_by = appearance.usedBy
+        # ao.ui.messageBox(str(appearance.id).translate(translator))
         for item in used_by:
             result = {}
             result['item'] = item
+            result['id'] = str(appearance.id).translate(translator)
             result['id'] = appearance.id
+
             if item.objectType == adsk.fusion.BRepBody.classType():
                 result['type'] = "Body"
-                # result['appearance'] = appearance.name
+                result['appearance'] = appearance.name
                 result['overide'] = item.appearanceSourceType
-                result['parent'] = item.assemblyContext.fullPathName
-                result['name'] = item.assemblyContext.fullPathName + " - " + item.name
+                if item.assemblyContext is not None:
+
+                    result['parent'] = item.assemblyContext.fullPathName
+                    result['name'] = item.assemblyContext.fullPathName + " - " + item.name
+                else:
+                    result['parent'] = ao.root_comp.name
+                    result['name'] = ao.root_comp.name + " - " + item.name
 
             elif item.objectType == adsk.fusion.BRepFace.classType():
                 result['type'] = "Face"
-                # result['appearance'] = appearance.name
+                result['appearance'] = appearance.name
                 result['overide'] = item.appearanceSourceType
-                result['parent'] = item.assemblyContext.fullPathName
-                result['name'] = item.assemblyContext.fullPathName + " - " + item.body.name + " - Face"
+
+                if item.assemblyContext is not None:
+                    result['parent'] = item.body.assemblyContext.fullPathName
+                    result['name'] = item.assemblyContext.fullPathName + " - " + item.body.name + " - Face"
+                else:
+                    result['parent'] = ao.root_comp.name
+                    result['name'] = ao.root_comp.name + " - " + item.body.name + " - Face"
 
             elif item.objectType == adsk.fusion.Occurrence.classType():
                 result['type'] = "Occurrence"
                 result['name_short'] = item.name
                 result['name'] = item.fullPathName
 
-                # result['appearance'] = appearance.name
+                result['appearance'] = appearance.name
                 if item.appearance is None:
                     result['overide'] = False
                 else:
                     result['overide'] = True
+
+            elif item.objectType == adsk.fusion.Component.classType():
+                result['type'] = "Component"
+                result['name_short'] = item.name
+                result['name'] = item.name
+
+                result['appearance'] = appearance.name
+
 
             results[appearance.name].append(result)
 
@@ -105,12 +132,15 @@ class AppearanceRemoverCommand(Fusion360CommandBase):
         index = 0
         for appearance_name, item_list in appearances_dict.items():
             # ao.ui.messageBox(appearance_name)
-            inputs.addGroupCommandInput(item_list[0]['id'], appearance_name)
+            translator = str.maketrans('', '', string.punctuation)
+            group_inputs = inputs.addGroupCommandInput(str(item_list[0]['id']).translate(translator), appearance_name)
             sub_index = 0
             for item in item_list:
-                bool_id = "bool_input" + str(index) + "_" + str(sub_index)
-                returnValue = inputs.addBoolValueInput(bool_id, item['name'], True, "", True)
+                bool_id = "bool_input_" + str(index) + "_" + str(sub_index)
 
+                # ao.ui.messageBox(str(item))
+                bool_input = group_inputs.children.addBoolValueInput(bool_id, item['name'], True, "", True)
+                bool_input.isEnabledCheckBoxDisplayed = True
                 item['item'].attributes.add("AppearanceUtilities", bool_id, item['id'])
                 sub_index += 1
 
