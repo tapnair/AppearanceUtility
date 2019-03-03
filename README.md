@@ -1,23 +1,16 @@
 # Fusion360 Appearance Utilities
 Set of Utilities to simplify working with Appearances in Fusion 360
 
+![Rename Command](./resources/cover_tree.png)
+
 The documentation still needs much work but here is a rough outline
 
-# Setup
-Download or clone this repo.  
-
-Move the folder into your add-ins directory.  [Click Here](https://tapnair.github.io/installation.html) for more information 
-
-Files in the Fusion360Utilities folder should not be modified.
-
-Rename the following items to your desired addin name: 
-* The top level folder
-* Fusion360AddinSkeleton.py 
-* Fusion360AddinSkeleton.manifest
-
-Edit the manifest file and update the fields accordingly
-
 # Commands:
+
+### Appearance Tree
+
+See image above.  Displays a tree of all applied materials and appearances.
+By un-checking a material or appearance you can remove it from the model.
 
 ### Remove All Appearances.
 
@@ -27,10 +20,21 @@ Removes all appearance overrides in the model
 
 Displays all objects associated with each appearance in the model allows you to selectively remove applications.
 
+![Remove Command](./resources/remove_command.png)
 
+# Setup
+Download or clone this repo.
 
-![Rename Command](./resources/remove_command.png)
+Move the folder into your add-ins directory.  [Click Here](https://tapnair.github.io/installation.html) for more information
 
+Files in the Fusion360Utilities folder should not be modified.
+
+Rename the following items to your desired addin name:
+* The top level folder
+* Fusion360AddinSkeleton.py
+* Fusion360AddinSkeleton.manifest
+
+Edit the manifest file and update the fields accordingly
 
 ## License
 Samples are licensed under the terms of the [MIT License](http://opensource.org/licenses/MIT). Please see the [LICENSE](LICENSE) file for full details.

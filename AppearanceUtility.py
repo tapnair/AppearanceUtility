@@ -63,7 +63,7 @@ cmd = {
     'palette_is_visible': True,
     'palette_show_close_button': True,
     'palette_is_resizable': True,
-    'palette_width': 420,
+    'palette_width': 450,
     'palette_height': 900,
     'class': DemoPaletteShowCommand
 }
@@ -77,7 +77,7 @@ cmd = {
     'cmd_resources': './resources',
     'workspace': 'FusionSolidEnvironment',
     'toolbar_panel_id': 'Appearances',
-    'command_visible': True,
+    'command_visible': False,
     'command_promoted': False,
     'palette_id': 'palette_id_appearance_tree',
     'class': DemoPaletteSendCommand
