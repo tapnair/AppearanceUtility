@@ -42,29 +42,29 @@ cmd = {
     'workspace': 'FusionSolidEnvironment',
     'toolbar_panel_id': 'Appearances',
     'command_visible': True,
-    'command_promoted': True,
+    'command_promoted': False,
     'class': AppearanceRemoveAllCommand
 }
 command_definitions.append(cmd)
 
 # Define parameters for 2nd command
 cmd = {
-    'cmd_name': 'Fusion Palette Demo Command',
-    'cmd_description': 'Fusion Demo Palette Description',
-    'cmd_id': 'cmdID_palette_demo_1',
+    'cmd_name': 'Appearance Tree',
+    'cmd_description': 'Fusion Appearance Utility to visualize material and appearance dependencies',
+    'cmd_id': 'cmdID_appearance_tree',
     'cmd_resources': './resources',
     'workspace': 'FusionSolidEnvironment',
-    'toolbar_panel_id': 'SolidScriptsAddinsPanel',
+    'toolbar_panel_id': 'Appearances',
     'command_visible': True,
     'command_promoted': False,
-    'palette_id': 'demo_palette_id',
-    'palette_name': 'Demo Palette Name',
+    'palette_id': 'palette_id_appearance_tree',
+    'palette_name': 'Appearance Tree',
     'palette_html_file_url': 'demo.html',
     'palette_is_visible': True,
     'palette_show_close_button': True,
     'palette_is_resizable': True,
-    'palette_width': 500,
-    'palette_height': 600,
+    'palette_width': 420,
+    'palette_height': 900,
     'class': DemoPaletteShowCommand
 }
 command_definitions.append(cmd)
@@ -73,13 +73,13 @@ command_definitions.append(cmd)
 cmd = {
     'cmd_name': 'Fusion Palette Send Command',
     'cmd_description': 'Send info to Fusion 360 Palette',
-    'cmd_id': 'cmdID_palette_send_demo_1',
+    'cmd_id': 'cmdID_palette_send',
     'cmd_resources': './resources',
     'workspace': 'FusionSolidEnvironment',
-    'toolbar_panel_id': 'SolidScriptsAddinsPanel',
+    'toolbar_panel_id': 'Appearances',
     'command_visible': True,
     'command_promoted': False,
-    'palette_id': 'demo_palette_id',
+    'palette_id': 'palette_id_appearance_tree',
     'class': DemoPaletteSendCommand
 }
 command_definitions.append(cmd)

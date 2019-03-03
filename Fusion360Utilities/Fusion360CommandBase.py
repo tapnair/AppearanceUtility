@@ -312,6 +312,15 @@ class Fusion360PaletteCommandBase(Fusion360CommandBase):
     def on_palette_execute(self, palette: adsk.core.Palette):
         pass
 
+    def on_stop(self):
+        app = adsk.core.Application.cast(adsk.core.Application.get())
+        ui = app.userInterface
+        palette = ui.palettes.itemById(self.palette_id)
+
+        if palette:
+            destroy_object(palette)
+        super().on_stop()
+
 
 class ExecutePreviewHandler(adsk.core.CommandEventHandler):
     def __init__(self, cmd_object):
@@ -514,14 +523,14 @@ class PaletteCommandExecuteHandler(adsk.core.CommandEventHandler):
                                           self.cmd_object_.palette_height)
 
                 # Add handler to HTMLEvent of the palette.
-                on_html_event = HTMLEventHandler(self.cmd_object_)
-                palette.incomingFromHTML.add(on_html_event)
-                handlers.append(on_html_event)
+                on_html_event_handler = HTMLEventHandler(self.cmd_object_)
+                palette.incomingFromHTML.add(on_html_event_handler)
+                handlers.append(on_html_event_handler)
 
                 # Add handler to CloseEvent of the palette.
-                on_closed = CloseEventHandler(self.cmd_object_)
-                palette.closed.add(on_closed)
-                handlers.append(on_closed)
+                on_closed_handler = CloseEventHandler(self.cmd_object_)
+                palette.closed.add(on_closed_handler)
+                handlers.append(on_closed_handler)
             else:
                 palette.isVisible = True
 
@@ -543,6 +552,7 @@ class HTMLEventHandler(adsk.core.HTMLEventHandler):
         ui = app.userInterface
 
         try:
+            # ui.messageBox("in event")
             html_args = adsk.core.HTMLEventArgs.cast(args)
 
             self.cmd_object_.on_html_event(html_args)

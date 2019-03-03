@@ -10,8 +10,6 @@ from .Fusion360Utilities.Fusion360Utilities import AppObjects
 from .Fusion360Utilities.Fusion360CommandBase import Fusion360CommandBase
 
 
-
-
 def get_appearances_dict():
     ao = AppObjects()
 
@@ -19,7 +17,6 @@ def get_appearances_dict():
     results = defaultdict(list)
 
     translator = str.maketrans('', '', string.punctuation)
-
 
     for appearance in all_appearances:
         used_by = appearance.usedBy

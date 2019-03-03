@@ -2,14 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Demo Palette</title>
+    <title>Appearance Tree</title>
 </head>
 <body>
-<p id='p1'>Click the button below or use the "Send info to HTML" command in the ADD-INS panel.</p>
-<button onclick='sendInfoToFusion()' type='button'>Click to send info to Fusion</button>
-<br/><br/>
-<p id='message'>Send a Message from Fusion 360 here by clicking Fusion Palette Send Command</p>
-<br/><br/>
+<h1 id='h1'>Appearance Tree</h1>
+<p id='p1'>Click the checkbox next to the appearance or material in the tree to remove it</p>
 <div id="jstree_demo_div"></div>
 </body>
 <link href="static/themes/default/style.min.css" rel="stylesheet"/>
@@ -36,9 +33,83 @@
                 } else if (action === 'tree_update') {
 
                     if (!data || data.length === 0) return;
-                    document.getElementById('message').innerHTML = "something happening";
-                    $('#jstree_demo_div').jstree(true).settings.core.data = JSON.parse(data).core;
-                    $('#jstree_demo_div').jstree(true).refresh();
+                    // document.getElementById('message').innerHTML = "something happening";
+                    // $('#jstree_demo_div').jstree({'core': {'data': data_in['core']}});
+
+                    // $('#jstree_demo_div').jstree(true).settings.core.data = data_in.core;
+                    // $('#jstree_demo_div').jstree(true).refresh();
+
+                    let data_in = JSON.parse(data);
+                    console.log(data_in);
+
+                    $('#jstree_demo_div').jstree({
+                        'core': {
+                            // "expand_selected_onload" : false,
+                            "check_callback": true,
+                            "data": data_in.core
+                        },
+                        "checkbox": {
+                            "three_state": true, // to avoid that fact that checking a node also check others
+                            "whole_node": false,  // to avoid checking the box just clicking the node
+                            "tie_selection": false, // for checking without selecting and selecting without checking
+                            // "keep_selected_style" : false
+                        },
+                        "types": {
+
+                            "appearance": {
+                                "icon": "./static/icons/Appearance/16x16.png"
+                            },
+                            "material": {
+                                "icon": "./static/icons/material/16x16.png"
+                            },
+                            "component": {
+                                "icon": "./static/icons/Component/16x16.png"
+                            },
+                            "component_group": {
+                                "icon": "./static/icons/ComponentGroup/16x16.png"
+                            },
+                            "body": {
+                                "icon": "./static/icons/Body/16x16.png",
+                            },
+                            "face": {
+                                "icon": "./static/icons/SurfaceBody/16x16.png"
+                            }
+                        },
+                        "plugins": ["checkbox", "types"]
+                    }).on({
+                        "check_node.jstree": function (e, data) {
+                            // document.getElementById('message').innerHTML = "checking";
+                            // alert(data.node.id + ' ' + data.node.text +
+                            //     (data.node.state.checked ? ' CHECKED' : ' NOT CHECKED') + '---1---')
+                            var args = {
+                                node_id: data.node.id,
+                                node_text: data.node.text,
+                                remove_material: data.node.state.checked,
+                                node_type: data.node.type
+                            };
+
+                            adsk.fusionSendData('check_node', JSON.stringify(args));
+                        },
+                        "uncheck_node.jstree": function (e, data) {
+                            // alert(data.node.id + ' ' + data.node.text +
+                            //     (data.node.state.checked ? ' CHECKED' : ' NOT CHECKED') + '---2---')
+
+                            var args = {
+                                node_id: data.node.id,
+                                node_text: data.node.text,
+                                remove_material: data.node.state.checked,
+                                node_type: data.node.type
+                            };
+
+                            adsk.fusionSendData('check_node', JSON.stringify(args));
+
+                        },
+                        "select_node.jstree": function (e, data) {
+                            // navigate(data.node.id, null);
+                            document.getElementById('message').innerHTML = "selecting";
+                        }
+                    });
+
                 } else {
                     return 'Unexpected command type: ' + action;
                 }
@@ -49,16 +120,6 @@
             return 'OK';
         }
     };
-
-    $('#jstree_demo_div').jstree({
-        "core": {
-            "check_callback": true
-        },
-        "plugins": ["wholerow", "sort", "checkbox", "unique", "dnd"]
-    })
-        .on("select_node.jstree", function (e, data) {
-            navigate(data.node.id, null);
-        });
 
 
 </script>
