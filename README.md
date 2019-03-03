@@ -5,6 +5,9 @@ Set of Utilities to simplify working with Appearances in Fusion 360
 
 The documentation still needs much work but here is a rough outline
 
+_Note: there is an issue if you have an appearance applied to the root
+component of your design, the utility won't be able remove it._
+
 # Commands:
 
 ### Appearance Tree

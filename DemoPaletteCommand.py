@@ -118,6 +118,9 @@ def add_appearances_to_tree(node_list):
             elif item.objectType == adsk.fusion.Component.classType():
                 appearance_node['id'] = item.name + " - " + appearance_name
                 appearance_node['parent'] = item.name
+                appearance_node["state"] = {"checkbox_disabled": True,
+                                            "checked": True
+                                            }
 
             else:
                 return
