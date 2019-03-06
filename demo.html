@@ -3,15 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <title>Appearance Tree</title>
+    <link href="static/themes/default/style.min.css" rel="stylesheet"/>
+    <link href="static/bootstrap-3.3.7-dist/css/bootstrap.css" rel="stylesheet">
+    <script src="static/jquery-1.11.0.min.js"></script>
+    <script src="static/jstree.js"></script>
+    <script src="static/bootstrap-3.3.7-dist/js/bootstrap.js"></script>
 </head>
 <body>
-<h1 id='h1'>Appearance Tree</h1>
-<p id='p1'>Click the checkbox next to the appearance or material in the tree to remove it</p>
+<!--<h1 id='h1'>Appearance Tree</h1>-->
+
+<div class="panel-group">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse1">Appearance Tree Info</a>
+            </h4>
+        </div>
+        <div class="panel-collapse collapse in" id="collapse1">
+            <div class="panel-body">
+                <p id='p1'>Click the checkbox next to the appearance or material in the tree to remove it. </p>
+                <br/>
+                <p id='p2'>Pressing the refresh button will remove the appearance and refresh the tree display.</p>
+                <br/>
+                <p id='p3'>To use the search feature you may have to click in the Fusion 360 graphics window then back
+                    into the
+                    search box.</p>
+                <br/>
+                <div id="tree_messages"></div>
+            </div>
+            <div class="panel-footer">
+                <a data-toggle="collapse" href="#collapse1">
+                    <i class="glyphicon glyphicon-chevron-up"></i>Click to collapse</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="margin-top:10px;">
+    <div class="col-sm-12">
+        <button class="btn btn-success btn-sm" onclick="refresh_tree();" type="button"><i
+                class="glyphicon glyphicon-refresh"></i>Refresh
+        </button>
+        <button class="btn btn-info btn-sm" onclick="expand_tree();" type="button"><i
+                class="glyphicon glyphicon-collapse-down"></i>Expand All
+        </button>
+        <button class="btn btn-info btn-sm" onclick="collapse_tree();" type="button"><i
+                class="glyphicon glyphicon-collapse-up"></i>Collapse All
+        </button>
+    </div>
+
+</div>
+
+<div class="row" style="margin-top:10px;">
+    <div class="col-sm-12" style="text-align:left;">
+        <input class="search-input" id="search-input" onclick="this.select()" placeholder="Search"/>
+    </div>
+</div>
+
 <div id="jstree_demo_div"></div>
 </body>
-<link href="static/themes/default/style.min.css" rel="stylesheet"/>
-<script src="static/jquery-1.11.0.min.js"></script>
-<script src="static/jstree.js"></script>
+
 
 <script>
     function sendInfoToFusion() {
@@ -22,6 +73,33 @@
         adsk.fusionSendData('send', JSON.stringify(args));
     }
 
+    var to = false;
+
+    $(document).ready(function () {
+        $(".search-input").keyup(function () {
+            var searchString = $(this).val();
+            $('#jstree_demo_div').jstree('search', searchString);
+        });
+    });
+
+
+    function refresh_tree() {
+        // alert("refresh");
+        var args = {
+            arg1: "Sample argument 1",
+            arg2: "Sample argument 2"
+        };
+        adsk.fusionSendData('refresh_tree', JSON.stringify(args))
+    }
+
+    function expand_tree() {
+        $('#jstree_demo_div').jstree(true).open_all();
+    }
+
+    function collapse_tree() {
+        $('#jstree_demo_div').jstree(true).close_all();
+    }
+
     window.fusionJavaScriptHandler = {
         handle: function (action, data) {
             try {
@@ -30,14 +108,21 @@
                     document.getElementById('message').innerHTML = data;
                 } else if (action === 'debugger') {
                     debugger;
-                } else if (action === 'tree_update') {
+                } else if (action === 'tree_refresh') {
 
                     if (!data || data.length === 0) return;
-                    // document.getElementById('message').innerHTML = "something happening";
-                    // $('#jstree_demo_div').jstree({'core': {'data': data_in['core']}});
 
-                    // $('#jstree_demo_div').jstree(true).settings.core.data = data_in.core;
-                    // $('#jstree_demo_div').jstree(true).refresh();
+                    let data_in = JSON.parse(data);
+
+                    $('#jstree_demo_div').jstree(true).settings.core.data = data_in.core;
+
+                    $('#jstree_demo_div').jstree(true).refresh();
+
+                } else if (action === 'tree_update') {
+                    // alert("update")
+                    if (!data || data.length === 0) return;
+                    // document.getElementById('message').innerHTML = "something happening";
+
 
                     let data_in = JSON.parse(data);
                     console.log(data_in);
@@ -56,26 +141,46 @@
                         },
                         "types": {
 
-                            "appearance": {
+                            "1-appearance": {
                                 "icon": "./static/icons/Appearance/16x16.png"
                             },
-                            "material": {
+                            "2-material": {
                                 "icon": "./static/icons/material/16x16.png"
                             },
-                            "component": {
+                            "4-component": {
                                 "icon": "./static/icons/Component/16x16.png"
                             },
-                            "component_group": {
+                            "4-component_group": {
                                 "icon": "./static/icons/ComponentGroup/16x16.png"
                             },
-                            "body": {
+                            "4-root_component": {
+                                "icon": "./static/icons/ComponentGroup/16x16.png"
+                            },
+                            "3-body": {
                                 "icon": "./static/icons/Body/16x16.png",
                             },
-                            "face": {
+                            "5-face": {
                                 "icon": "./static/icons/SurfaceBody/16x16.png"
+                            },
+                            "1-root_appearance": {
+                                "icon": "./static/icons/Appearance/16x16.png"
                             }
                         },
-                        "plugins": ["checkbox", "types"]
+                        'sort': function (a, b) {
+                            a1 = this.get_node(a);
+                            b1 = this.get_node(b);
+                            if (a1.icon == b1.icon) {
+                                return (a1.text > b1.text) ? 1 : -1;
+                            } else {
+                                return (a1.icon > b1.icon) ? 1 : -1;
+                            }
+                        },
+                        "search": {
+                            "case_sensitive": false,
+                            "show_only_matches": true
+                        },
+                        "plugins":
+                            ["checkbox", "types", "sort", "search"]
                     }).on({
                         "check_node.jstree": function (e, data) {
                             // document.getElementById('message').innerHTML = "checking";
@@ -108,12 +213,49 @@
                             // navigate(data.node.id, null);
                             document.getElementById('message').innerHTML = "selecting";
                         }
+                    }).bind('ready.jstree', function (event, data) {
+                        var $tree = $(this);
+                        $($tree.jstree().get_json($tree, {
+                            flat: true
+                        })).each(function () {
+
+                            var node = $("#jstree_demo_div").jstree(true).get_node(this.id);
+                            if (node.type === "1-root_appearance") {
+                                document.getElementById('tree_messages').innerHTML =
+                                    "<b>Note:</b> <i>There is an appearance applied to to the root component of this design\n" +
+                                    "You must remove this appearance using the standard appearnce command in Fusion 360</i>";
+                            }
+                        });
                     });
+                    // $('#jstree_demo_div').jstree(true).get_json('#', {'flat': true}).each(
+                    //     function (index, value) {
+                    //         var node = $("#jstree_demo_div").jstree().get_node(this.id);
+                    //         if (node.type === "1-root_appearance") {
+                    //             alert("here")
+                    //             document.getElementById('tree_messages').innerHTML =
+                    //                 "Note: There is an appearance applied to to the root component of this design\n" +
+                    //                 "You must remove this appearance using the standard appearnce command in Fusion 360";
+                    //         }
+                    //     }
+                    // );
+                    // var $tree = $('#jstree_demo_div');
+                    // $($tree.jstree().get_json($tree, {
+                    //     flat: true
+                    // }))
+                    //     .each(function (index, value) {
+                    //         // var node = $("#tree").jstree().get_node(this.id);
+                    //         // var lvl = node.parents.length;
+                    //         // var idx = index;
+                    //         // console.log('node index = ' + idx + ' level = ' + lvl);
+                    //         alert("here")
+                    //     });
+
 
                 } else {
                     return 'Unexpected command type: ' + action;
                 }
-            } catch (e) {
+            } catch
+                (e) {
                 console.log(e);
                 console.log('exception caught with command: ' + action + ', data: ' + data);
             }

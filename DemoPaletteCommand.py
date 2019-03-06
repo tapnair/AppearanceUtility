@@ -22,19 +22,21 @@ def add_appearances_to_tree(node_list):
         used_by = appearance.usedBy
         for item in used_by:
 
+            add_node = True
+
             # ao.ui.messageBox(item.objectType)
             appearance_node = {"state": {"checked": True}}
 
             appearance_name = appearance.name
             appearance_id = appearance.id
 
-            appearance_node["type"] = "appearance"
+            appearance_node["type"] = "1-appearance"
             appearance_node['text'] = appearance_name
 
             if item.objectType == adsk.fusion.BRepBody.classType():
                 body = {
                     'text': item.name,
-                    "type": "body",
+                    "type": "3-body",
                     "state": {"opened": True,
                               "checkbox_disabled": True
                               }
@@ -54,20 +56,26 @@ def add_appearances_to_tree(node_list):
 
                 # Check if source is material or appearance
                 if item.appearanceSourceType == adsk.core.AppearanceSourceTypes.MaterialAppearanceSource:
-                    appearance_id = item.material.id
-                    appearance_node["type"] = "material"
-
-                # If not a material add a node for material
+                    if item.material.id != ao.app.preferences.materialPreferences.defaultMaterial.id:
+                        appearance_id = item.material.id
+                        appearance_node["type"] = "2-material"
+                    else:
+                        add_node = False
+                # If not a material add a node for material if it is not the default
                 else:
-                    appearance_node_2 = {
-                        "state": {"checked": True},
-                        "type": "material",
-                        'text': item.material.name,
-                        "parent": body['id'],
-                        "id": body['id'] + " - " + item.material.name
-                    }
-                    item.attributes.add("AppearanceUtilitiesPalette", appearance_node_2['id'], item.material.id)
-                    node_list.append(appearance_node_2)
+                    if item.material.id != ao.app.preferences.materialPreferences.defaultMaterial.id:
+                        appearance_node_2 = {
+                            "state": {"checked": True},
+                            "type": "2-material",
+                            'text': item.material.name,
+                            "parent": body['id'],
+                            "id": body['id'] + " - " + item.material.name
+                        }
+                        item.attributes.add("AppearanceUtilitiesPalette", appearance_node_2['id'], item.material.id)
+                        node_list.append(appearance_node_2)
+
+                    else:
+                        add_node = False
 
                 if not face_keys.get(body['id'], False):
                     node_list.append(body)
@@ -77,14 +85,14 @@ def add_appearances_to_tree(node_list):
 
                 body = {
                     'text': item.body.name,
-                    "type": "body",
-                    "state": {"opened": True,
+                    "type": "3-body",
+                    "state": {"opened": False,
                               "checkbox_disabled": True}
                 }
 
                 face = {
                     'text': "Face" + " - " + str(item.tempId),
-                    "type": "face",
+                    "type": "5-face",
                     "state": {"opened": True,
                               "checkbox_disabled": True}
                 }
@@ -121,13 +129,14 @@ def add_appearances_to_tree(node_list):
                 appearance_node["state"] = {"checkbox_disabled": True,
                                             "checked": True
                                             }
+                appearance_node["type"] = "1-root_appearance"
 
             else:
                 return
 
-            item.attributes.add("AppearanceUtilitiesPalette", appearance_node['id'], appearance_id)
-
-            node_list.append(appearance_node)
+            if add_node:
+                item.attributes.add("AppearanceUtilitiesPalette", appearance_node['id'], appearance_id)
+                node_list.append(appearance_node)
 
 
 def make_component_tree():
@@ -138,8 +147,7 @@ def make_component_tree():
     root_node = {
         'id': ao.root_comp.name,
         'text': ao.root_comp.name,
-        'icon': "./static/icons/ComponentGroup/16x16.png",
-        "type": "assembly",
+        "type": "4-root_component",
         'parent': "#",
         "state": {"opened": True,
                   "checkbox_disabled": True
@@ -161,19 +169,19 @@ def make_assembly_nodes(occurrences: adsk.fusion.OccurrenceList, node_list, pare
             'id': occurrence.name,
             'text': occurrence.name,
             'parent': parent,
-            "state": {"opened": True,
+            "state": {"opened": False,
                       "checkbox_disabled": True
                       }
         }
 
         if occurrence.childOccurrences.count > 0:
 
-            node["type"] = "component_group"
+            node["type"] = "4-component_group"
             node_list.append(node)
             make_assembly_nodes(occurrence.childOccurrences, node_list, occurrence.name)
 
         else:
-            node["type"] = "component"
+            node["type"] = "4-component"
             node_list.append(node)
 
 
@@ -188,15 +196,22 @@ def adjust_material(node_id, appearance_checked, node_type):
         if item is not None:
             if not appearance_checked:
 
-                if node_type == "material":
+                if node_type == "2-material":
                     item.material = ao.app.preferences.materialPreferences.defaultMaterial
                 else:
                     item.appearance = None
             else:
-                if node_type == "material":
+                if node_type == "2-material":
                     item.material = ao.design.materials.itemById(attributes[0].value)
                 else:
                     item.appearance = ao.design.appearances.itemById(attributes[0].value)
+
+
+def build_data():
+    node_list = make_component_tree()
+    add_appearances_to_tree(node_list)
+    return {'core': node_list, 'root_name': "the_root"}
+
 
 
 # Class for a Fusion 360 Palette Command
@@ -214,12 +229,21 @@ class DemoPaletteShowCommand(Fusion360PaletteCommandBase):
 
     # Run when ever a fusion event is fired from the corresponding web page
     def on_html_event(self, html_args: adsk.core.HTMLEventArgs):
-
+        ao = AppObjects()
         # ao.ui.messageBox(html_args.action)
 
         if html_args.action == "check_node":
             data = json.loads(html_args.data)
             adjust_material(data["node_id"], data["remove_material"], data["node_type"])
+
+        if html_args.action == "refresh_tree":
+            data = json.loads(html_args.data)
+            palette = ao.ui.palettes.itemById(self.palette_id)
+
+            # Send message to the HTML Page
+            if palette:
+                return_json = build_data()
+                palette.sendInfoToHTML('tree_refresh', dumps(return_json))
 
     # Handle any extra cleanup when user closes palette here
     def on_palette_close(self):
@@ -248,10 +272,7 @@ class DemoPaletteSendCommand(Fusion360CommandBase):
         # Send message to the HTML Page
         if palette:
             # palette.sendInfoToHTML('send', message)
-
-            node_list = make_component_tree()
-            add_appearances_to_tree(node_list)
-            return_json = {'core': node_list, 'root_name': "the_root"}
+            return_json = build_data()
             palette.sendInfoToHTML('tree_update', dumps(return_json))
 
     # Run when the user selects your command icon from the Fusion 360 UI

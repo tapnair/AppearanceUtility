@@ -28,7 +28,7 @@ cmd = {
     'workspace': 'FusionSolidEnvironment',
     'toolbar_panel_id': 'Appearances',
     'command_visible': True,
-    'command_promoted': True,
+    'command_promoted': False,
     'class': AppearanceRemoverCommand
 }
 command_definitions.append(cmd)
@@ -50,13 +50,13 @@ command_definitions.append(cmd)
 # Define parameters for 2nd command
 cmd = {
     'cmd_name': 'Appearance Tree',
-    'cmd_description': 'Fusion Appearance Utility to visualize material and appearance dependencies',
+    'cmd_description': 'Fusion Appearance Utility to visualize and remove material and appearance over rides',
     'cmd_id': 'cmdID_appearance_tree',
     'cmd_resources': './resources',
     'workspace': 'FusionSolidEnvironment',
     'toolbar_panel_id': 'Appearances',
     'command_visible': True,
-    'command_promoted': False,
+    'command_promoted': True,
     'palette_id': 'palette_id_appearance_tree',
     'palette_name': 'Appearance Tree',
     'palette_html_file_url': 'demo.html',

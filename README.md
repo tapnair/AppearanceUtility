@@ -13,7 +13,11 @@ component of your design, the utility won't be able remove it._
 ### Appearance Tree
 
 See image above.  Displays a tree of all applied materials and appearances.
-By un-checking a material or appearance you can remove it from the model.
+* By un-checking a material or appearance you can remove it from the model.
+* Hitting the refresh button will remove all unchecked appearances from the model and refresh the tree.
+* Expand All and Collapse all do just that.
+* Search allows you to filter the tree.  _Note: there is an issue where you may have to click in the Fusion 360 graphics window and back into the search box to get the cursor to go into the search box._
+
 
 ### Remove All Appearances.
 
