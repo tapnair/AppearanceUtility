@@ -64,6 +64,7 @@ def add_appearances_to_tree(node_list):
                 # If not a material add a node for material if it is not the default
                 else:
                     if item.material.id != ao.app.preferences.materialPreferences.defaultMaterial.id:
+
                         appearance_node_2 = {
                             "state": {"checked": True},
                             "type": "2-material",
@@ -73,9 +74,6 @@ def add_appearances_to_tree(node_list):
                         }
                         item.attributes.add("AppearanceUtilitiesPalette", appearance_node_2['id'], item.material.id)
                         node_list.append(appearance_node_2)
-
-                    else:
-                        add_node = False
 
                 if not face_keys.get(body['id'], False):
                     node_list.append(body)
@@ -210,6 +208,7 @@ def adjust_material(node_id, appearance_checked, node_type):
 def build_data():
     node_list = make_component_tree()
     add_appearances_to_tree(node_list)
+
     return {'core': node_list, 'root_name': "the_root"}
 
 
